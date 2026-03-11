@@ -3,7 +3,7 @@ FROM ${BUILD_FROM}
 
 ARG BUILD_ARCH
 RUN apk add --no-cache python3 py3-pip \
-    && pip3 install --no-cache-dir paho-mqtt>=1.6.0
+    && pip3 install --break-system-packages --no-cache-dir paho-mqtt>=1.6.0
 
 WORKDIR /app
 COPY run.sh /
