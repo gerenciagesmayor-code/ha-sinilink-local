@@ -1,0 +1,7 @@
+name: Sinilink Local
+url: https://github.com/TU_USUARIO/homeassistant-sinilink-local
+maintainer: Tu Nombre
+addons:
+  - slug: sinilink_broker_proxy
+    name: Sinilink Broker Proxy
+    description: Proxy MQTT local para termostatos Sinilink XY-WFT1 (60+ dispositivos)
