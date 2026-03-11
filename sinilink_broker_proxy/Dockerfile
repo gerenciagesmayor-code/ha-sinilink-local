@@ -9,6 +9,7 @@ WORKDIR /app
 COPY run.sh /
 COPY sinilink_broker_proxy.py /app/
 
-RUN chmod a+x /run.sh
+RUN sed -i 's/\r$$//' /run.sh \
+    && chmod a+x /run.sh
 
 CMD ["/run.sh"]
