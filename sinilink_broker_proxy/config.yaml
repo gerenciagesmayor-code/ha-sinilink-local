@@ -28,3 +28,5 @@ schema:
   ha_host_ip: str
   discovery_interval: int
   poll_interval: int
+  scan_start_ip: str?
+  scan_end_ip: str?
