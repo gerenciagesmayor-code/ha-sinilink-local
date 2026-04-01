@@ -1,0 +1,2 @@
+# Evitar CRLF en run.sh (causa "/run.sh: not found" en el add-on)
+run.sh text eol=lf
