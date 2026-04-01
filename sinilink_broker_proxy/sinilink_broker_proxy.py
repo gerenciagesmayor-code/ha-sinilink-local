@@ -256,9 +256,9 @@ def on_connect(client: mqtt.Client, userdata: Any, flags: Any, rc: int, *args: A
         logger.warning("MQTT connect failed: rc=%s", rc)
         return
     logger.info("MQTT connected")
-    client.subscribe("APPWT#", qos=0)
-    client.subscribe(f"{HA_TOPIC_PREFIX}_+/setpoint/set", qos=0)
-    client.subscribe(f"{HA_TOPIC_PREFIX}_+/mode/set", qos=0)
+    # Los topics "APPWT{MAC}" y "{prefix}_{uid}/..." no permiten filtros tipo "prefijo+"
+    # en MQTT. Nos suscribimos a todo y filtramos por prefijo/sufijo en on_message.
+    client.subscribe("#", qos=0)
     for mac in proxy_state.devices():
         publish_discovery(client, mac, None)
 
