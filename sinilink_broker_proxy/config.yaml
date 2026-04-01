@@ -1,6 +1,6 @@
 name: Sinilink Broker Proxy
 description: Proxy MQTT local para termostatos Sinilink XY-WFT1. Descubre dispositivos por UDP, responde find/findport y publica estado en Home Assistant. Se reinicia con el sistema.
-version: "1.0.3"
+version: "1.0.4"
 slug: sinilink_broker_proxy
 arch:
   - aarch64
@@ -8,7 +8,7 @@ arch:
   - armv7
   - armhf
   - i386
-init: true
+init: false
 startup: application
 boot: auto
 host_network: true
