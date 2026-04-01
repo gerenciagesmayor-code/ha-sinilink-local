@@ -42,6 +42,9 @@ UDP_PORT = 1024
 MAGIC = b"SINILINK521"
 DISCOVERY_BROADCAST_INTERVAL = int(os.environ.get("DISCOVERY_INTERVAL", "300"))   # 5 min
 POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "30"))
+# Rango opcional para escanear IPs directamente (además del broadcast)
+SCAN_START_IP = os.environ.get("SCAN_START_IP") or ""
+SCAN_END_IP = os.environ.get("SCAN_END_IP") or ""
 UDP_TIMEOUT = 5
 DISCOVERY_WAIT = 5        # Segundos recogiendo respuestas tras broadcast
 
@@ -97,8 +100,29 @@ def udp_read_state(ip: str) -> dict[str, Any] | None:
         sock.close()
 
 
+def _ip_to_int(ip: str) -> int | None:
+    parts = ip.split(".")
+    if len(parts) != 4:
+        return None
+    try:
+        nums = [int(p) for p in parts]
+    except ValueError:
+        return None
+    if any(n < 0 or n > 255 for n in nums):
+        return None
+    return (nums[0] << 24) | (nums[1] << 16) | (nums[2] << 8) | nums[3]
+
+
+def _int_to_ip(value: int) -> str:
+    return ".".join(str((value >> shift) & 0xFF) for shift in (24, 16, 8, 0))
+
+
 def udp_discovery() -> dict[str, str]:
-    """Broadcast SINILINK521 a 255.255.255.255:1024; devuelve dict mac_col -> ip."""
+    """Descubrimiento de termostatos.
+
+    - Broadcast SINILINK521 a 255.255.255.255:1024.
+    - Opcionalmente, escanea un rango SCAN_START_IP-SCAN_END_IP si se configura.
+    """
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     sock.settimeout(0.5)
@@ -117,6 +141,22 @@ def udp_discovery() -> dict[str, str]:
                 break
     finally:
         sock.close()
+
+    # Escaneo adicional de rango explícito si está configurado
+    start_int = _ip_to_int(SCAN_START_IP) if SCAN_START_IP else None
+    end_int = _ip_to_int(SCAN_END_IP) if SCAN_END_IP else None
+    if start_int is not None and end_int is not None and start_int <= end_int:
+        logger.info(
+            "Discovery extra scan: %s - %s", SCAN_START_IP, SCAN_END_IP
+        )
+        for value in range(start_int, end_int + 1):
+            ip = _int_to_ip(value)
+            parsed = udp_read_state(ip)
+            if parsed and parsed.get("MAC"):
+                mac = mac_col(parsed["MAC"])
+                if mac and mac not in result:
+                    result[mac] = ip
+
     return result
 
 
