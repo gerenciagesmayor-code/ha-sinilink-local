@@ -58,5 +58,10 @@ export SCAN_END_IP="${SCAN_END_IP:-}"
 
 echo "[sinilink] MQTT_HOST=${MQTT_HOST} MQTT_PORT=${MQTT_PORT} HA_HOST_IP=${HA_HOST_IP}"
 echo "[sinilink] DISCOVERY_INTERVAL=${DISCOVERY_INTERVAL} POLL_INTERVAL=${POLL_INTERVAL}"
-
-exec python3 /app/sinilink_broker_proxy.py
+echo "[sinilink] arrancando python..."
+python3 -u /app/sinilink_broker_proxy.py
+rc=$?
+echo "[sinilink] ERROR: proceso terminado con codigo ${rc}"
+echo "[sinilink] manteniendo contenedor 300s para inspeccion de logs"
+sleep 300
+exit "${rc}"
